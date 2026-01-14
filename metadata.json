@@ -1,5 +1,6 @@
+
 {
-  "name": "Hệ Thống Đánh Giá Trẻ Cuối Chủ Đề",
-  "description": "Ứng dụng chuyên nghiệp dành cho giáo viên mầm non để nhập liệu và quản lý bảng đánh giá trẻ theo chủ đề, hỗ trợ xuất dữ liệu và lưu trữ.",
+  "name": "QUẢN LÝ ĐÁNH GIÁ TRẺ MẦM NON",
+  "description": "Tác giả: Nguyễn Thị Bé Hòa - GV Trường MG Bình Hòa. Hệ thống đánh giá trẻ cuối chủ đề chuyên nghiệp.",
   "requestFramePermissions": []
 }

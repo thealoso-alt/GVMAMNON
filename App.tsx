@@ -59,24 +59,19 @@ const App: React.FC = () => {
   const exportFinalExcel = () => {
     const totalCols = activeMtKeys.length + 4;
     
-    // Cấu trúc mảng dữ liệu mô phỏng file Excel in ấn
     const data: any[][] = [
-      [metadata.schoolName.toUpperCase()], // Row 0: TRƯỜNG
-      ["Lớp: " + metadata.className],      // Row 1: Lớp (nằm dưới trường)
-      [""],                                // Row 2: Trống
-      ["BẢNG ĐÁNH GIÁ TRẺ CUỐI CHỦ ĐỀ"],    // Row 3: Tiêu đề (Sẽ được gộp ô căn giữa)
-      ["Chủ đề: " + metadata.topic],        // Row 4: Chủ đề
-      ["Thời gian thực hiện: " + metadata.duration], // Row 5: Thời gian
-      [""],                                // Row 6: Trống
-      // Header Table (Row 7)
+      [metadata.schoolName.toUpperCase()],
+      ["Lớp: " + metadata.className],
+      [""],
+      ["BẢNG ĐÁNH GIÁ TRẺ CUỐI CHỦ ĐỀ"],
+      ["Chủ đề: " + metadata.topic],
+      ["Thời gian thực hiện: " + metadata.duration],
+      [""],
       ["STT", "Họ và tên", "MỤC TIÊU GIÁO DỤC (Đạt +; chưa đạt -)", ...Array(activeMtKeys.length - 1).fill(""), "Tổng Đạt", "Tổng Chưa"],
-      // Header Lĩnh Vực (Row 8)
       ["", "", ...activeCategories.flatMap(cat => [cat.name, ...Array(cat.count - 1).fill("")]), "", ""],
-      // Header Mã MT (Row 9)
       ["", "", ...activeMtKeys.map(k => mtLabels[k] || "MT...") , "", ""],
     ];
 
-    // Dữ liệu học sinh
     students.forEach((s, idx) => {
       const vals = Object.values(s.evaluations);
       const reach = vals.filter(v => v === '+').length;
@@ -84,13 +79,11 @@ const App: React.FC = () => {
       data.push([idx + 1, s.name, ...activeMtKeys.map(k => s.evaluations[k] || ""), reach, unreach]);
     });
 
-    // Các hàng thống kê
     data.push(["", "Tổng số trẻ đạt", ...activeMtKeys.map(k => stats[k].reached), "", ""]);
     data.push(["", "Tỉ lệ trẻ đạt (%)", ...activeMtKeys.map(k => stats[k].total ? Math.round((stats[k].reached / stats[k].total) * 100) : 0), "", ""]);
     data.push(["", "Số trẻ chưa đạt", ...activeMtKeys.map(k => stats[k].unreached), "", ""]);
     data.push(["", "Tỉ lệ trẻ chưa đạt (%)", ...activeMtKeys.map(k => stats[k].total ? Math.round((stats[k].unreached / stats[k].total) * 100) : 0), "", ""]);
     
-    // Chân trang
     data.push([""]);
     data.push(["Nhận xét chung của giáo viên:"]);
     data.push([remarks]);
@@ -104,18 +97,17 @@ const App: React.FC = () => {
 
     const ws = XLSX.utils.aoa_to_sheet(data);
 
-    // Gộp ô (Merges) chuẩn hóa cấu trúc
     const merges = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }, // TRƯỜNG
-      { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } }, // Lớp
-      { s: { r: 3, c: 0 }, e: { r: 3, c: totalCols - 1 } }, // Tiêu đề bảng
-      { s: { r: 4, c: 0 }, e: { r: 4, c: totalCols - 1 } }, // Chủ đề
-      { s: { r: 5, c: 0 }, e: { r: 5, c: totalCols - 1 } }, // Thời gian
-      { s: { r: 7, c: 0 }, e: { r: 8, c: 0 } }, // STT
-      { s: { r: 7, c: 1 }, e: { r: 8, c: 1 } }, // Họ tên
-      { s: { r: 7, c: 2 }, e: { r: 7, c: 2 + activeMtKeys.length - 1 } }, // Header MTGD
-      { s: { r: 7, c: totalCols - 2 }, e: { r: 8, c: totalCols - 2 } }, // Tổng đạt
-      { s: { r: 7, c: totalCols - 1 }, e: { r: 8, c: totalCols - 1 } }, // Tổng chưa
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } },
+      { s: { r: 3, c: 0 }, e: { r: 3, c: totalCols - 1 } },
+      { s: { r: 4, c: 0 }, e: { r: 4, c: totalCols - 1 } },
+      { s: { r: 5, c: 0 }, e: { r: 5, c: totalCols - 1 } },
+      { s: { r: 7, c: 0 }, e: { r: 8, c: 0 } },
+      { s: { r: 7, c: 1 }, e: { r: 8, c: 1 } },
+      { s: { r: 7, c: 2 }, e: { r: 7, c: 2 + activeMtKeys.length - 1 } },
+      { s: { r: 7, c: totalCols - 2 }, e: { r: 8, c: totalCols - 2 } },
+      { s: { r: 7, c: totalCols - 1 }, e: { r: 8, c: totalCols - 1 } },
     ];
 
     let currentCol = 2;
@@ -125,10 +117,10 @@ const App: React.FC = () => {
     });
     ws['!merges'] = merges;
 
-    // Thiết lập độ rộng cột
+    ws['!ref'] = XLSX.utils.encode_range({ s: { c: 0, r: 0 }, e: { c: totalCols - 1, r: data.length - 1 } });
     ws['!cols'] = [
-      { wch: 6 },  // STT
-      { wch: 28 }, // Họ tên
+      { wch: 6 },
+      { wch: 28 },
       ...activeMtKeys.map(() => ({ wch: 5 })), 
       { wch: 10 }, 
       { wch: 10 }
@@ -137,7 +129,6 @@ const App: React.FC = () => {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Bao_Cao");
     
-    // Xuất file
     XLSX.writeFile(wb, `Bao_Cao_In_Chuan_${metadata.className || 'Tre'}.xlsx`);
   };
 
@@ -208,12 +199,21 @@ const App: React.FC = () => {
     XLSX.writeFile(wb, "Mau.xlsx");
   };
 
+  const getCellBgColor = (val: string) => {
+    if (val === '+') return 'bg-white';
+    if (val === '-') return 'bg-blue-200';
+    return 'bg-red-200';
+  };
+
   return (
     <div className="min-h-screen pb-10 bg-slate-50 font-sans text-[13px]">
       <nav className="bg-indigo-950 text-white p-4 no-print flex justify-between items-center shadow-md">
-        <h1 className="font-bold text-lg flex items-center gap-2">
-          <i className="fas fa-school"></i> QUẢN LÝ ĐÁNH GIÁ TRẺ MẦM NON
-        </h1>
+        <div className="flex flex-col">
+          <h1 className="font-bold text-lg flex items-center gap-2">
+            <i className="fas fa-school"></i> QUẢN LÝ ĐÁNH GIÁ TRẺ MẦM NON
+          </h1>
+          <span className="text-[10px] opacity-70 italic">Tác giả: Nguyễn Thị Bé Hòa - GV Trường MG Bình Hòa</span>
+        </div>
         <div className="flex gap-3">
           <button onClick={exportFinalExcel} className="bg-white text-indigo-900 px-4 py-2 rounded text-sm font-bold shadow transition-all border border-indigo-200 hover:bg-indigo-50">
             <i className="fas fa-file-excel mr-1"></i> Xuất Excel In (A4)
@@ -309,11 +309,17 @@ const App: React.FC = () => {
                     <td className="border border-black text-center">{idx + 1}</td>
                     <td className="border border-black px-2 relative group">{s.name}</td>
                     {activeMtKeys.map(key => (
-                      <td key={key} onClick={() => {
-                        const current = s.evaluations[key];
-                        const next = current === '+' ? '-' : (current === '-' ? '' : '+');
-                        setStudents(students.map(st => st.id === s.id ? {...st, evaluations: {...st.evaluations, [key]: next}} : st));
-                      }} className="border border-black text-center cursor-pointer font-bold text-lg">{s.evaluations[key]}</td>
+                      <td 
+                        key={key} 
+                        onClick={() => {
+                          const current = s.evaluations[key];
+                          const next = current === '+' ? '-' : (current === '-' ? '' : '+');
+                          setStudents(students.map(st => st.id === s.id ? {...st, evaluations: {...st.evaluations, [key]: next}} : st));
+                        }} 
+                        className={`border border-black text-center cursor-pointer font-bold text-lg transition-colors ${getCellBgColor(s.evaluations[key])}`}
+                      >
+                        {s.evaluations[key]}
+                      </td>
                     ))}
                     <td className="border border-black text-center font-bold">{reach || ''}</td>
                     <td className="border border-black text-center font-bold">{unreach || ''}</td>
